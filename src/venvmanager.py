@@ -8,15 +8,17 @@ class venvManager:
     def createVenv(self):
         venv = subprocess.run(["python3", "-m", "venv", self.__envPath])
     
-    def activate(self):
-        venvFolder = os.path.join(self.__folerPath, "venv", "Scripts", "activate")
-        subprocess.run(["call", venvFolder], shell=True, capture_output=True)
-    
-    def deactivate(self):
-        subprocess.run(["deactivate"])
+    def pip(self):
+        pipPath = os.path.join(self.__envPath, "Scripts", "pip,exe")
+        return pipPath
+
+    def python(self):
+        pythonPath = os.path.join(self.__envPath, "Scripts", "python.exe")
+        return pythonPath
     
     def installRequirements(self):
-        pass
+        pipPath = self.pip()
+        subprocess.run([pipPath, "install", "-r", "requirements.txt"])
 
     def checkRequirements(self):
         pass
