@@ -20,7 +20,8 @@ class venvManager:
     
     def installRequirements(self):
         pipPath = self.pip()
-        subprocess.run([pipPath, "install", "-r", "requirements.txt"])
+        reqPath = os.path.join(self.__folderPath, "requirements.txt")
+        subprocess.run([pipPath, "install", "-r", reqPath])
 
     def validRequirements(self):
         pass
