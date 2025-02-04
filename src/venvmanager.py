@@ -29,8 +29,6 @@ class venvManager:
         pythonPath = self.python()
         subprocess.run([pythonPath, file])
 
-    def getFolderPath(self):
-        return self.__folderPath
 
 folder = venvManager(r"C:/Users/Ghabr/OneDrive - Cardiff University/2nd Year/CM2203 Informatics/Portfolio 2/TemplatePython")
 folder.createVenv()
