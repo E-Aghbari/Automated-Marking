@@ -1,15 +1,17 @@
-import os, subprocess
+import os
+import subprocess
 
 class venvManager:
     def __init__(self, folderPath):
-        self.__folerPath = folderPath
+        """Initialise folder and virtual environment path"""
+        self.__folderPath = folderPath
         self.__envPath = os.path.join(folderPath, "venv")
 
     def createVenv(self):
-        venv = subprocess.run(["python3", "-m", "venv", self.__envPath])
+        subprocess.run(["python3", "-m", "venv", self.__envPath])
     
     def pip(self):
-        pipPath = os.path.join(self.__envPath, "Scripts", "pip,exe")
+        pipPath = os.path.join(self.__envPath, "Scripts", "pip.exe")
         return pipPath
 
     def python(self):
@@ -20,13 +22,16 @@ class venvManager:
         pipPath = self.pip()
         subprocess.run([pipPath, "install", "-r", "requirements.txt"])
 
-    def checkRequirements(self):
+    def validRequirements(self):
         pass
 
-    def getFolderPath(self):
-        return self.__folerPath
+    def runPython(self, file):
+        pythonPath = self.python()
+        subprocess.run([pythonPath, file])
 
-folder = venvManager(f"D:\Portfolio\\first-contributions")
-# folder.createVenv()
-folder.activate()
+    def getFolderPath(self):
+        return self.__folderPath
+
+folder = venvManager(r"C:/Users/Ghabr/OneDrive - Cardiff University/2nd Year/CM2203 Informatics/Portfolio 2/TemplatePython")
+folder.createVenv()
 # print(folder.getFolderPath())
