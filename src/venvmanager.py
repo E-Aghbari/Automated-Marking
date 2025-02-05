@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 class venvManager:
     def __init__(self, folderPath):
@@ -8,7 +9,8 @@ class venvManager:
         self.__envPath = os.path.join(folderPath, "venv")
 
     def createVenv(self):
-        subprocess.run(["python3", "-m", "venv", self.__envPath])
+        if not os.path.exists(self.__envPath):
+            subprocess.run([sys.executable, "-m", "venv", self.__envPath])
     
     def pip(self):
         pipPath = os.path.join(self.__envPath, "Scripts", "pip.exe")
@@ -26,11 +28,17 @@ class venvManager:
     def validRequirements(self):
         pass
 
+    # def checkRequirements(self):
+    #     pipPath = self.pip()
+    #     asdd = subprocess.run([pipPath, 'list'])
+    #     print(asdd.stdout)
+
     def runPython(self, file):
         pythonPath = self.python()
         subprocess.run([pythonPath, file])
 
 
-folder = venvManager(r"C:/Users/Ghabr/OneDrive - Cardiff University/2nd Year/CM2203 Informatics/Portfolio 2/TemplatePython")
+folder = venvManager(r"D:\Portfolio\first-contributions")
 folder.createVenv()
+# folder.checkRequirements()
 # print(folder.getFolderPath())
