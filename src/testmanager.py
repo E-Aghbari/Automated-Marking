@@ -18,12 +18,25 @@ def testTask5():
     pass
 
 @contextmanager
-def overrideFiles(teacherPath, studentPath):
+def overrideFiles(teacherPath, studentPath, taskNames):
+    backupPath = os.path.join(studentPath, "backup")
+    if not os.path.exists(backupPath):
+        os.mkdir(backupPath)
+    
     try:
-        for i in range(len(studentPath)):
-            backupFile = f"{studentPath[i]}.bak"
-            shutil.copy2(teacherPath[i], studentPath[i])
+        for i in range(len(taskNames)):
+
+            studentFile = os.path.join(studentPath, taskNames[i])
+            backupFile = os.path.join(backupPath, f"{taskNames[i]}.bak")
+            shutil.copy2(studentFile, backupFile)
+
+            teacherFile = os.path.join(teacherPath, taskNames[i])
+            shutil.copy2(teacherFile, studentPath)
+
+        yield
         
     finally:
-        pass
+        for i in range(len(taskNames)):
+            backupFile = os.path.join(backupPath, f"{taskNames[i]}.bak")
+            shutil.move(backupFile, studentPath)
         
