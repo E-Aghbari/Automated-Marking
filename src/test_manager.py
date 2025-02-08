@@ -61,7 +61,7 @@ def overrideFiles(teacherPath, studentPath, taskNames):
 def run_task(taskName, teacherPath, studentPath, venvManager):
     config = TASK_CONFIG[taskName]
     files_to_override = config["files_to_override"]
-    test_script = os.path.join(studentPath, config["test_script"])
+    test_script = config["test_script"]
 
     with overrideFiles(teacherPath, studentPath, files_to_override):
        return venvManager.run_python(["-m", "unittest", test_script])
