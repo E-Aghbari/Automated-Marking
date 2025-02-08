@@ -72,7 +72,8 @@ class VenvManager:
         result = subprocess.run(
             command,
             capture_output=True,
-            text=True
+            text=True,
+            cwd= self._folderPath
         )
 
         if result.returncode != 0:
