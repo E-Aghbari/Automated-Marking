@@ -20,7 +20,7 @@ TASK_CONFIG = {
 
 """Create a custom context manager to override files when executing tasks."""
 @contextmanager
-def overrideFiles(teacherPath, studentPath, taskNames):
+def overrideFiles(teacherPath, studentPath, tasksToOverride):
     
     ## Create backup directory
     backupPath = os.path.join(studentPath, "backup")
@@ -29,7 +29,7 @@ def overrideFiles(teacherPath, studentPath, taskNames):
     ## Track the files that were backed up
     backups= []
     try:
-        for task in taskNames:
+        for task in tasksToOverride:
 
             ## Prepare task paths
             studentFile = os.path.join(studentPath, task)
