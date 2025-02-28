@@ -73,7 +73,7 @@ class SubmissionPreprocessor:
         self.teacher_test_dir = Path(teacher_test_dir)
         self.submissions_root = Path(submissions_root)
         self.scenarios = [
-            {'name': 'Original', 'override': []},
+            # {'name': 'Original', 'override': []},
             {'name': 'Task1_Override', 'override': ['Task_1.py']},
             {'name': 'Task1_Task2_Override', 'override': ['Task_1.py', 'Task_2.py']}
         ]
@@ -87,6 +87,9 @@ class SubmissionPreprocessor:
     def process_single_submission(self, submission_path: Path):
         """Process a single submission directory"""
         print(f"\nProcessing submission: {submission_path.name}")
+
+        # Copy test files to scenario copy
+        self._copy_test_files(submission_path)
         
         # Create scenario copies
         for scenario in self.scenarios:
@@ -96,9 +99,6 @@ class SubmissionPreprocessor:
                 dest=scenario_path,
                 override_files=scenario['override']
             )
-            
-            # Copy test files to scenario copy
-            self._copy_test_files(scenario_path)
 
     def _copy_submission_version(self, src: Path, dest: Path, override_files: list):
         """Create a scenario copy with specified file overrides"""
@@ -123,6 +123,7 @@ class SubmissionPreprocessor:
         for test_file in self.teacher_test_dir.glob('Testing_*.py'):
             shutil.copy2(test_file, dest_dir / test_file.name)
             print(f"Copied test file {test_file.name} to {dest_dir.name}")
+        shutil.copy2(self.teacher_test_dir / 'Dummy.py', dest_dir / 'Dummy.py')
 
     def _ignore_temp_dirs(self, path: str, names: list) -> set:
         """Ignore temp directories during copy"""
@@ -130,4 +131,5 @@ class SubmissionPreprocessor:
     
 sub = SubmissionPreprocessor("TemplatePythonModel", "tests\Cleaned_Test_Files")
 
-sub.process_single_submission(Path("tests\Cleaned_Test_Files\Portfolio 2 Upload Zone_c000000"))
+sub.process_single_submission(Path("tests\Cleaned_Test_Files\Portfolio 2 Upload Zone_c444"))
+# sub.process_all_submissions()
