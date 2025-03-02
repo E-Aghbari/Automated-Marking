@@ -2,20 +2,21 @@ from contextlib import contextmanager
 import shutil
 import os
 from pathlib import Path
+from venv_manager import VenvManager
 
 
 TASK_CONFIG = {
     "Task_1": {
-        "files_to_override": [],
-        "test_script": "tests.TemplatePythonModel.Testing_1.py"
+        "test_script": "Testing_1.py",
+        "scenario": None  # Indicates main submission directory
     },
     "Task_2": {
-        "files_to_override": ["Task_1.py"],
-        "test_script": "Testing_2.py"
+        "test_script": "Testing_2.py",
+        "scenario": "Task1_Override"
     },
     "Task_3": {
-        "files_to_override": ["Task_1.py", "Task_2.py"],
-        "test_script": "Testing_3.py"
+        "test_script": "Testing_3.py",
+        "scenario": "Task1_Task2_Override"
     }
 }
 
@@ -59,13 +60,29 @@ def overrideFiles(teacherPath, studentPath, tasksToOverride):
             if os.path.exists(backupFile):
                 shutil.move(backup, student)
 
-def run_task(taskName, teacherPath, studentPath, venvManager):
-    config = TASK_CONFIG[taskName]
-    files_to_override = config["files_to_override"]
-    test_script = config["test_script"]
+def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager):
+    """Run test in appropriate directory"""
+    config = TASK_CONFIG.get(task_name)
+    if not config:
+        raise ValueError(f"Unknown task: {task_name}")
+    
+    # Determine test directory
+    if config["scenario"]:
+        test_dir = submission_path / config["scenario"]
+    else:
+        test_dir = submission_path  # Original directory
+    
+    test_script = test_dir / config["test_script"]
+    print(f"Looking for test script: {test_script}")
 
-    with overrideFiles(teacherPath, studentPath, files_to_override):
-       return venvManager.run_python(["-m", "unittest", test_script])
+    if not test_script.exists():
+        raise FileNotFoundError(f"Test script {test_script} not found")
+
+    # Run test from the appropriate directory
+    return venv_manager.run_python(
+        args=["-m", "unittest", test_script.name],
+        cwd=test_dir # Critical for proper imports
+    )
     
 
 class SubmissionPreprocessor:
@@ -128,8 +145,11 @@ class SubmissionPreprocessor:
     def _ignore_temp_dirs(self, path: str, names: list) -> set:
         """Ignore temp directories during copy"""
         return {name for name in names if name in [s['name'] for s in self.scenarios]}
-    
-sub = SubmissionPreprocessor("TemplatePythonModel", "tests\Cleaned_Test_Files")
 
-sub.process_single_submission(Path("tests\Cleaned_Test_Files\Portfolio 2 Upload Zone_c444"))
-# sub.process_all_submissions()
+
+if __name__ == "__main__":
+
+    sub = SubmissionPreprocessor("TemplatePythonModel", "tests/Cleaned_Test_Files")
+
+    sub.process_all_submissions()
+    # sub.process_all_submissions()
