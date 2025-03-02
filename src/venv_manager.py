@@ -1,21 +1,22 @@
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 
 """Creating and managing virtual environment"""
 class VenvManager:
 
     ## Initialise the folder and virtual environment path
-    def __init__(self, folderPath):
-        self._folderPath = folderPath
-        self._envPath = os.path.join(folderPath, "venv")
+    def __init__(self, folderPath: Path):
+        self._folderPath = Path(folderPath).resolve()
+        self._envPath = self._folderPath / "venv"
 
     ## Create virtual environment in the submission directory as 'venv'
     def create_venv(self):
-        if not os.path.exists(self._envPath):
+        if not self._envPath.exists():
             result = subprocess.run(
-                [sys.executable, "-m", "venv", self._envPath],
+                [sys.executable, "-m", "venv", str(self._envPath)],
                 capture_output= True,
                 text=True
             )
@@ -24,37 +25,37 @@ class VenvManager:
     
     ## Venv's pip path for execution
     def get_pip_path(self):
-        if not os.path.exists(self._envPath):
+        if not self._envPath.exists():
             raise FileNotFoundError(f"Virtual environment not created. Run create_venv() first.")
         
         if sys.platform == 'win32':
-            pipPath = os.path.join(self._envPath, "Scripts", "pip.exe")
+            pipPath = self._envPath / "Scripts" / "pip.exe"
         else:
-            pipPath = os.path.join(self._envPath, "bin", "pip")
+            pipPath = self._envPath / "bin" / "pip"
         
         return pipPath
 
     ## Venv's python path for execution
     def get_python_path(self):
-        if not os.path.exists(self._envPath):
+        if not self._envPath.exists():
             raise FileNotFoundError(f"Virtual environment not created. Run create_venv() first.")
         
         if sys.platform == 'win32':
-            pythonPath = os.path.join(self._envPath, "Scripts", "python.exe")
+            pythonPath = self._envPath / "Scripts" / "python.exe"
         else: 
-            pythonPath = os.path.join(self._envPath, "bin", "python")
+            pythonPath = self._envPath / "bin" / "python"
             
         return pythonPath
     
     ## Install dependencies specified within 'requirements.txt'
     def install_requirements(self):
-        reqPath = os.path.join(self._folderPath, "requirements.txt")
-        if not os.path.exists(reqPath):
+        reqPath = self._folderPath / "requirements.txt"
+        if not reqPath.exists():
             raise FileNotFoundError(f"Requirements.txt file does not exist!")
         
         pipPath = self.get_pip_path()
         result = subprocess.run(
-            [pipPath, "install", "-r", reqPath],
+            [str(pipPath), "install", "-r", str(reqPath)],
             capture_output=True,
             text=True
         )
@@ -66,14 +67,14 @@ class VenvManager:
         pass
 
     ## Run program using venv's python
-    def run_python(self, args):
-        pythonPath = self.get_python_path()
+    def run_python(self, args, cwd):
+        pythonPath = str(self.get_python_path())
         command = [pythonPath] + args
         result = subprocess.run(
             command,
             capture_output=True,
             text=True,
-            cwd= self._folderPath
+            cwd = str(cwd) if cwd else None
         )
 
         if result.returncode != 0:
@@ -81,5 +82,6 @@ class VenvManager:
         
         return result.stdout
 
-folder = VenvManager(r"D:/nasdfa/my/borther")
-folder.create_venv()
+if __name__ == "__main__":
+    folder = VenvManager(r"D:/nasdfa/my/borther")
+    folder.create_venv()
