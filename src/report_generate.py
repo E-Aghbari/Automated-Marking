@@ -6,7 +6,7 @@ import re
 def parse_log(log_path):
     test_cases = []
     pattern = re.compile(
-        r'DEBUG:root:(.*?);Correct (True|False)\*+.*?; on input (.+?)(?:\.| Expected)',
+        r'DEBUG:root:([^\n;]+);Correct (True|False)\*+.*?; on input ((?:\[[^\]]*\]|\{[^\}]*\}|[^\n]+))',
         re.DOTALL
     )
     
@@ -14,6 +14,7 @@ def parse_log(log_path):
         log_content = f.read()  # Read entire file for multi-line matches
     
     matches = pattern.findall(log_content)
+    print(matches)
     
     for match in matches:
         test_name = match[0].strip()
@@ -42,7 +43,7 @@ def generate_detailed_report(task_number, student_dir):
     if log_file.exists():
         try:
             cases = parse_log(log_file)
-            print(cases)
+            # print(cases)
             for case in cases:
                 report_data.append({
                     'Student': student_name,
