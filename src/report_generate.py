@@ -6,7 +6,7 @@ import re
 def parse_log(log_path):
     test_cases = []
     pattern = re.compile(
-        r'DEBUG:root:([^\n;]+);Correct (True|False)\*+.*?; on input ((?:\[[^\]]*\]|\{[^\}]*\}|[^\n]+))',
+        r'DEBUG:root:([^\n;]+);Correct (True|False)\*+(?:.*?; on input ((?:\[[^\]]*\]|\{[^\}]*\}|[^\n]+)))?',
         re.DOTALL
     )
     
@@ -19,7 +19,7 @@ def parse_log(log_path):
     for match in matches:
         test_name = match[0].strip()
         status = 'Passed' if match[1] == 'True' else 'Failed'
-        test_input = match[2].strip()
+        test_input = match[2].strip() if match[2] else "No input"
 
         test_cases.append({
             'Test Name': test_name,
