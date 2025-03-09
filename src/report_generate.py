@@ -70,7 +70,7 @@ def generate_detailed_report(task_number, student_dir):
         })
 
     df = pd.DataFrame(report_data)
-    report_name = f"{student_name}_Task_{task_number}_Report.xlsx"
+    report_name = student_dir / f"{student_name}_Task_{task_number}_Report.xlsx"
 
     # Formatting for readability
     df = df[['Student', 'Task', 'Test Name', 'Input Parameters', 'Result']]
