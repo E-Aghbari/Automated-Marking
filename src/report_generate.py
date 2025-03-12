@@ -2,6 +2,7 @@ import argparse
 import pandas as pd
 from pathlib import Path
 import re
+from test_manager import TASK_CONFIG
 
 def parse_log(log_path):
     test_cases = []
@@ -29,16 +30,17 @@ def parse_log(log_path):
 
     return test_cases
 
-def generate_detailed_report(task_number, student_dir):
+def generate_detailed_report(task, student_dir):
     report_data = []
 
     student_path = Path(student_dir)
-    if not student_path.is_dir() or 'Portfolio' not in student_path.name:
+    if not student_path.is_dir() :
         print(f"Skipping invalid directory: {student_dir}")
         return
 
     student_name = student_path.name
-    log_file = student_path / f"Test_{task_number}.log"
+    task_number = int(task[-1])
+    log_file = student_path / TASK_CONFIG[task]["scenario"] / f"Test_{task_number}.log"
 
     if log_file.exists():
         try:
