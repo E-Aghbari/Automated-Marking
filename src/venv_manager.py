@@ -15,7 +15,7 @@ class VenvManager:
     ## Create virtual environment in the submission directory as 'venv'
     def create_venv(self):
         if not self._envPath.exists():
-            print("Creating venv within student's directory.")
+            print(f"Creating venv within {self._folderPath.name} directory.")
             result = subprocess.run(
                 [sys.executable, "-m", "venv", str(self._envPath)],
                 capture_output= True,
@@ -23,15 +23,15 @@ class VenvManager:
             )
             if result.returncode != 0:
                 raise RuntimeError (f"Failed to create venv: {result.stderr}")
-            print("venv has successfully been created.")
+            print("venv has successfully been created.\n")
 
         else:
-            print("venv already created.")
+            print(f"venv has already been created for {self._folderPath.name}.\n")
     
     ## Venv's pip path for execution
-    def get_pip_path(self):
+    def get_pip_path(self) -> Path:
         if not self._envPath.exists():
-            raise FileNotFoundError(f"Virtual environment not created. Run create_venv() first.")
+            raise FileNotFoundError("Virtual environment not created. Run create_venv() first.\n")
         
         if sys.platform == 'win32':
             pipPath = self._envPath / "Scripts" / "pip.exe"
@@ -41,8 +41,8 @@ class VenvManager:
         return pipPath
 
     ## Venv's python path for execution
-    def get_python_path(self):
-        self.get_origianl_submission()
+    def get_python_path(self) -> Path:
+        self.get_original_submission()
         print(self._envPath)
         if not self._envPath.exists():
             raise FileNotFoundError(f"Virtual environment not created. Run create_venv() first.")
@@ -57,10 +57,13 @@ class VenvManager:
     ## Install dependencies specified within 'requirements.txt'
     def install_requirements(self):
         reqPath = self._folderPath / "requirements.txt"
-        if not reqPath.exists():
-            raise FileNotFoundError(f"Requirements.txt file does not exist!")
-        
         pipPath = self.get_pip_path()
+
+        if not reqPath.exists():
+            print(f"⚠️ Warning: No 'requirements.txt' found in {self._folderPath}. Skipping dependency installation.\n")
+            return 
+            
+        print("📦 Installing dependencies for virtual environment...")
         result = subprocess.run(
             [str(pipPath), "install", "-r", str(reqPath)],
             capture_output=True,
@@ -68,12 +71,15 @@ class VenvManager:
         )
 
         if result.returncode != 0:
-            raise RuntimeError (f"Failed to install dependencies: {result.stderr}") 
+            print(f"❌ Failed to install dependencies: {result.stderr}\n")
+        else:
+            print("✅ Dependencies installed successfully.\n")
+    
         
     def valid_requirements(self):
         pass
 
-    def get_original_submission(self):
+    def get_original_submission(self) -> Path:
 
         original_name = self._folderPath.name
 
@@ -93,9 +99,8 @@ class VenvManager:
 
 
     ## Run program using venv's python
-    def run_python(self, args, cwd):
+    def run_python(self, args, cwd) -> str:
         pythonPath = str(self.get_python_path())
-        print("wasssup", pythonPath)
         command = [pythonPath] + args
         result = subprocess.run(
             command,
