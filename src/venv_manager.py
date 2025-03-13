@@ -15,6 +15,7 @@ class VenvManager:
     ## Create virtual environment in the submission directory as 'venv'
     def create_venv(self):
         if not self._envPath.exists():
+            print("Creating venv within student's directory.")
             result = subprocess.run(
                 [sys.executable, "-m", "venv", str(self._envPath)],
                 capture_output= True,
@@ -22,6 +23,10 @@ class VenvManager:
             )
             if result.returncode != 0:
                 raise RuntimeError (f"Failed to create venv: {result.stderr}")
+            print("venv has successfully been created.")
+
+        else:
+            print("venv already created.")
     
     ## Venv's pip path for execution
     def get_pip_path(self):
