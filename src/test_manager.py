@@ -116,8 +116,7 @@ class SubmissionPreprocessor:
             submission_name = submission_dir.name
             if submission_name.startswith('Portfolio')and not self._is_preprocessed(submission_name) :
                 self.process_single_submission(submission_dir)
-                break
-
+                
     def process_single_submission(self, submission_path: Path):
 
         student_name = submission_path.name
