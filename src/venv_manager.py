@@ -42,6 +42,8 @@ class VenvManager:
 
     ## Venv's python path for execution
     def get_python_path(self):
+        self.get_origianl_submission()
+        print(self._envPath)
         if not self._envPath.exists():
             raise FileNotFoundError(f"Virtual environment not created. Run create_venv() first.")
         
@@ -71,9 +73,29 @@ class VenvManager:
     def valid_requirements(self):
         pass
 
+    def get_original_submission(self):
+
+        original_name = self._folderPath.name
+
+        if original_name.endswith("_Task1_Override"):
+
+            original_name = original_name.replace("_Task1_Override", "")
+            self._envPath = self._folderPath.parent / original_name / "venv"
+
+        elif original_name.endswith("_Task1_Task2_Override"):
+
+            original_name = original_name.replace("_Task1_Task2_Override", "")
+            self._envPath = self._folderPath.parent / original_name / "venv"
+        
+
+        return self._folderPath.parent / original_name
+            
+
+
     ## Run program using venv's python
     def run_python(self, args, cwd):
         pythonPath = str(self.get_python_path())
+        print("wasssup", pythonPath)
         command = [pythonPath] + args
         result = subprocess.run(
             command,
@@ -88,5 +110,5 @@ class VenvManager:
         return result.stdout
 
 if __name__ == "__main__":
-    folder = VenvManager(r"D:/nasdfa/my/borther")
-    folder.create_venv()
+    folder = VenvManager(r"tests/Cleaned_Test_Files/Portfolio 2 Upload Zone_c666666_Task1_Override")
+    folder.run_python("Task_2", r"tests/Cleaned_Test_Files/Portfolio 2 Upload Zone_c666666_Task1_Override")

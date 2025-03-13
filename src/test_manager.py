@@ -8,7 +8,7 @@ from venv_manager import VenvManager
 TASK_CONFIG = {
     "Task_1": {
         "test_script": "Testing_1.py",
-        "scenario": None  # Indicates main submission directory
+        "scenario": None
     },
     "Task_2": {
         "test_script": "Testing_2.py",
@@ -17,7 +17,16 @@ TASK_CONFIG = {
     "Task_3": {
         "test_script": "Testing_3.py",
         "scenario": "Task1_Task2_Override"
+    },
+    "Task_4": {
+        "test_script": "Testing_4.py",
+        "scenario": None
+    },
+    "Task_5": {
+        "test_script": "Testing_5.py",
+        "scenario": None
     }
+    
 }
 
 """Create a custom context manager to override files when executing tasks."""
@@ -61,7 +70,6 @@ def overrideFiles(teacherPath, studentPath, tasksToOverride):
                 shutil.move(backup, student)
 
 def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager):
-    """Run test in appropriate directory"""
     config = TASK_CONFIG.get(task_name)
     if not config:
         raise ValueError(f"Unknown task: {task_name}")
@@ -84,6 +92,11 @@ def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager):
         cwd=test_dir # Critical for proper imports
     )
     
+# def submission_manager(submission_name: str, scenario: str):
+#     if submission_name.endswith("Override"):
+#         original_name = submission_name.replace(f"_{scenario["scenario"]}", "")
+#         return original_name
+    
 
 class SubmissionPreprocessor:
     def __init__(self, teacher_test_dir: str, submissions_root: str):
@@ -96,35 +109,39 @@ class SubmissionPreprocessor:
         ]
 
     def process_all_submissions(self):
-        """Process all submissions in the root directory"""
         for submission_dir in self.submissions_root.iterdir():
-            if submission_dir.is_dir():
+            if not submission_dir.is_dir():
+                continue
+
+            submission_name = submission_dir.name
+            if submission_name.startswith('Portfolio')and not self._is_preprocessed(submission_name) :
                 self.process_single_submission(submission_dir)
+                break
 
     def process_single_submission(self, submission_path: Path):
-        """Process a single submission directory"""
-        print(f"\nProcessing submission: {submission_path.name}")
 
-        # Copy test files to scenario copy
+        student_name = submission_path.name
+        print(f"\nProcessing submission: {student_name}")
+
+        # Copy test files to the "Original" directory
         self._copy_test_files(submission_path)
-        
-        # Create scenario copies
+    
+        # Create scenario copies using the "Original" directory as the source
         for scenario in self.scenarios:
-            scenario_path = submission_path / scenario['name']
+            scenario_path = self.submissions_root / f"{student_name}_{scenario['name']}"
             self._copy_submission_version(
-                src=submission_path,
+                src=submission_path,  # Use "Original" as the base
                 dest=scenario_path,
                 override_files=scenario['override']
             )
 
     def _copy_submission_version(self, src: Path, dest: Path, override_files: list):
-        """Create a scenario copy with specified file overrides"""
         # Remove existing copy if exists
         if dest.exists():
             shutil.rmtree(dest)
             
         # Copy original files
-        shutil.copytree(src, dest, ignore=self._ignore_temp_dirs)
+        shutil.copytree(src, dest, ignore=shutil.ignore_patterns('venv', '__pycache__'))
         
         # Apply teacher file overrides
         for file_name in override_files:
@@ -136,20 +153,29 @@ class SubmissionPreprocessor:
                 print(f"Warning: Teacher file {file_name} not found")
 
     def _copy_test_files(self, dest_dir: Path):
-        """Copy all test files to target directory"""
         for test_file in self.teacher_test_dir.glob('Testing_*.py'):
             shutil.copy2(test_file, dest_dir / test_file.name)
             print(f"Copied test file {test_file.name} to {dest_dir.name}")
         shutil.copy2(self.teacher_test_dir / 'Dummy.py', dest_dir / 'Dummy.py')
+        shutil.copy2(self.teacher_test_dir / 'Helper.py', dest_dir / 'Helper.py')
 
     def _ignore_temp_dirs(self, path: str, names: list) -> set:
         """Ignore temp directories during copy"""
         return {name for name in names if name in [s['name'] for s in self.scenarios]}
+    
+    def _is_preprocessed(self, submission_name: str):
+        """Check whether submission was processed before"""
+        return any(submission_name.endswith(f"_{scenario['name']}") for scenario in self.scenarios)
 
 
 if __name__ == "__main__":
 
-    sub = SubmissionPreprocessor("TemplatePythonModel", "tests/Cleaned_Test_Files")
-
+    sub = SubmissionPreprocessor(r'TemplatePythonModel', Path(r"tests/Cleaned_Test_Files"))
     sub.process_all_submissions()
+    # run_task("Task_1", )
+
+    # process_single_submission(Path(r"tests/Cleaned_Test_Files/Portfolio 2 Upload Zone_c000000"))
+
+
+    # sub.process_all_submissions()
     # sub.process_all_submissions()
