@@ -4,70 +4,33 @@ import os
 from pathlib import Path
 from venv_manager import VenvManager
 
-
 TASK_CONFIG = {
     "Task_1": {
         "test_script": "Testing_1.py",
-        "scenario": None
+        "scenario": None,
+        "override": []  # No overrides for Task_1
     },
     "Task_2": {
         "test_script": "Testing_2.py",
-        "scenario": "Task1_Override"
+        "scenario": "Task1_Override",
+        "override": ["Task_1.py"]  # Overriding Task_1.py
     },
     "Task_3": {
         "test_script": "Testing_3.py",
-        "scenario": "Task1_Task2_Override"
+        "scenario": "Task1_Task2_Override",
+        "override": ["Task_1.py", "Task_2.py"]  # Overriding Task_1.py & Task_2.py
     },
     "Task_4": {
         "test_script": "Testing_4.py",
-        "scenario": None
+        "scenario": None,
+        "override": []  # No overrides for Task_4
     },
     "Task_5": {
         "test_script": "Testing_5.py",
-        "scenario": None
+        "scenario": None,
+        "override": []  # No overrides for Task_5
     }
-    
 }
-
-"""Create a custom context manager to override files when executing tasks."""
-@contextmanager
-def overrideFiles(teacherPath, studentPath, tasksToOverride):
-    
-    ## Create backup directory
-    backupPath = os.path.join(studentPath, "backup")
-    os.makedirs(backupPath, exist_ok=True)
-
-    ## Track the files that were backed up
-    backups= []
-    try:
-        for task in tasksToOverride:
-
-            ## Prepare task paths
-            studentFile = os.path.join(studentPath, task)
-            backupFile = os.path.join(backupPath, f"{task}.bak")
-            teacherFile = os.path.join(teacherPath, task)
-
-            ## Back up student's task files in case they exist.
-            if os.path.exists(studentFile):
-                shutil.copy2(studentFile, backupFile)
-                backups.append((backupFile, studentFile))
-            else:
-                print(f"Student {task} does not exist.")
-
-            ## Override student's task file with teacher's version.
-            if os.path.exists(teacherFile):
-                shutil.copy2(teacherFile, studentFile)
-            else:
-                print(f"Teacher {task} does not exist.")
-
-        yield
-        
-    finally:
-
-        ## Restore the original student's task file after executing the test.
-        for backup, student in backups:
-            if os.path.exists(backupFile):
-                shutil.move(backup, student)
 
 def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager):
     config = TASK_CONFIG.get(task_name)
@@ -92,20 +55,15 @@ def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager):
         cwd=test_dir # Critical for proper imports
     )
     
-# def submission_manager(submission_name: str, scenario: str):
-#     if submission_name.endswith("Override"):
-#         original_name = submission_name.replace(f"_{scenario["scenario"]}", "")
-#         return original_name
-    
 
 class SubmissionPreprocessor:
     def __init__(self, teacher_test_dir: str, submissions_root: str):
         self.teacher_test_dir = Path(teacher_test_dir)
         self.submissions_root = Path(submissions_root)
         self.scenarios = [
-            # {'name': 'Original', 'override': []},
-            {'name': 'Task1_Override', 'override': ['Task_1.py']},
-            {'name': 'Task1_Task2_Override', 'override': ['Task_1.py', 'Task_2.py']}
+            {'name':config['scenario'], 'override': config['override']}
+            for config in TASK_CONFIG.values()
+            if config['scenario'] is not None
         ]
 
     def process_all_submissions(self):
@@ -170,10 +128,11 @@ class SubmissionPreprocessor:
 if __name__ == "__main__":
 
     sub = SubmissionPreprocessor(r'TemplatePythonModel', Path(r"tests/Cleaned_Test_Files"))
-    sub.process_all_submissions()
+    # print(sub.scenarios)
+    # sub.process_all_submissions()
     # run_task("Task_1", )
 
-    # process_single_submission(Path(r"tests/Cleaned_Test_Files/Portfolio 2 Upload Zone_c000000"))
+    sub.process_single_submission(Path(r"tests/Cleaned_Test_Files/Portfolio 2 Upload Zone_c000000"))
 
 
     # sub.process_all_submissions()
