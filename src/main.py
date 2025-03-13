@@ -6,7 +6,8 @@ from report_generate import generate_detailed_report
 # 1. Clean non-cleaned 
 # 2. Set up venvs for
 # 3. Copy Files and override tasks
-# 4. 
+# 4. Run tasks
+# 5. Generate collated report 
 
 
 
@@ -28,7 +29,11 @@ def preprocess_subs(teacher_files: Path, submissions_root: Path):
 
 def grade_all_submissions(task: str, submissions_root: Path):
     for submission in submissions_root.iterdir():
-        grade_single_submission(task, submission)
+        if not submission.is_dir():
+            continue
+        submission_name = submission.name
+        if submission_name.startswith("Portfolio"):
+            grade_single_submission(task, submission)
 
 
 def grade_single_submission(task: str, student_dir: Path):
@@ -49,9 +54,11 @@ def grade_single_submission(task: str, student_dir: Path):
 
         
     except Exception as e:
-        print(f"Error grading {task}: {str(e)}")
+        print(f"Error grading {task}: {str(e)}\n")
     # generate_detailed_report(task, student_dir)
 
 if __name__ == "__main__":
     print(Path(__file__).resolve())
-    grade_single_submission("Task_1", Path(r"tests/Cleaned_Test_Files/Portfolio 2 Upload Zone_c000000"))
+    # grade_single_submission("Task_1", Path(r"tests/Cleaned_Test_Files/Portfolio 2 Upload Zone_c000000"))
+    # setup_venvs(Path(r"tests/Cleaned_Test_Files"))
+    grade_all_submissions("Task_1", Path(r"tests/Cleaned_Test_Files"))
