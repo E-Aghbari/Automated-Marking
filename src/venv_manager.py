@@ -211,7 +211,7 @@ class VenvManager:
             capture_output=True,
             text=True,
             cwd = str(cwd) if cwd else None,
-            timeout=15.0
+            timeout=59.0
         )
 
         if result.returncode != 0:

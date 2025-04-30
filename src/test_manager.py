@@ -9,6 +9,7 @@ import shutil
 from pathlib import Path
 from venv_manager import VenvManager
 from config import TASK_CONFIG
+from tqdm import tqdm
 
 def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager) -> str:
     """
@@ -53,9 +54,7 @@ def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager) -
         # On failure, write the exception details to a crash log file in the test directory
         with open(submission_path / f"TEST_{task_name}.crash", 'w' ) as f:
             f.write(str(e))
-    except ImportError:
-        with open(submission_path / f"TEST_{task_name}.crash", 'w' ) as f:
-            f.write(f"Import Error; student may installed extra packages")
+
 
     
 class SubmissionPreprocessor:
@@ -83,27 +82,34 @@ class SubmissionPreprocessor:
 
     def process_all_submissions(self) -> None:
         # Step 1: Inject test files into each Portfolio_* submission
-        for submission_dir in self.submissions_root.iterdir():
-            if submission_dir.is_dir() and submission_dir.name.startswith('Portfolio'):
-                self._copy_test_files(submission_dir)
+        portfolio_submissions = [submission_dir for submission_dir in self.submissions_root.iterdir() 
+                                if submission_dir.is_dir() and submission_dir.name.startswith('Portfolio')]
+        
+        with tqdm(total=len(portfolio_submissions), desc="Injecting test files") as pbar:
+            for submission_dir in portfolio_submissions:
+                    self._copy_test_files(submission_dir)
+                    pbar.update(1)
 
         # Step 2: Move all original Portfolio_* into Original_Submissions
         self.original_dir.mkdir(exist_ok=True)
-        for submission_dir in self.submissions_root.iterdir():
-            if submission_dir.is_dir() and submission_dir.name.startswith('Portfolio'):
-                shutil.move(str(submission_dir), self.original_dir / submission_dir.name)
-
+        with tqdm(total=len(portfolio_submissions), desc="Moving original submissions") as pbar:
+            for submission_dir in portfolio_submissions:
+                    shutil.move(str(submission_dir), self.original_dir / submission_dir.name)
+                    pbar.update(1)
+        
         # Step 3: Create copies and apply overrides
-        for version_name, override_files in self.override_dirs.items():
-            version_dir = self.submissions_root / version_name
-            if version_dir.exists():
-                shutil.rmtree(version_dir)
-            shutil.copytree(self.original_dir, version_dir, ignore=shutil.ignore_patterns('venv', '__pycache__'))
+        with tqdm(total=len(self.override_dirs), desc= "Copying and applying overrides") as pbar:
+            for version_name, override_files in self.override_dirs.items():
+                version_dir = self.submissions_root / version_name
+                if version_dir.exists():
+                    shutil.rmtree(version_dir)
+                shutil.copytree(self.original_dir, version_dir, ignore=shutil.ignore_patterns('venv', '__pycache__'))
 
-            # Apply overrides in each copied submission
-            for submission_dir in version_dir.iterdir():
-                if submission_dir.is_dir():
-                    self._apply_overrides(submission_dir, override_files)
+                # Apply overrides in each copied submission
+                for submission_dir in version_dir.iterdir():
+                    if submission_dir.is_dir():
+                        self._apply_overrides(submission_dir, override_files)
+                pbar.update(1)
 
     def _copy_test_files(self, dest_dir: Path) -> None:
         for test_file in self.teacher_test_dir.glob('Testing_*.py'):
@@ -120,7 +126,7 @@ class SubmissionPreprocessor:
             teacher_file = self.teacher_test_dir / file_name
             if teacher_file.exists():
                 shutil.copy2(teacher_file, submission_dir / file_name)
-                print(f"Overridden {file_name} in {submission_dir.relative_to(self.submissions_root)}")
+                # print(f"Overridden {file_name} in {submission_dir.relative_to(self.submissions_root)}")
             else:
                 print(f"Warning: Teacher override file {file_name} not found.")
 # class SubmissionPreprocessor:

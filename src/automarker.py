@@ -24,7 +24,6 @@ import sys
 import os
 from tqdm import tqdm
 import automarker_gui 
-import asyncio
 
 def submission_cleaner(non_cleaned_root: Path, cleaned_path: Path = None) -> Path:
     """
@@ -291,7 +290,7 @@ def main():
 
     elif args.command == "run-tests":
         tasks = (args.tasks).split(',')
-        asyncio.run(grade_all_submissions(tasks, path))
+        grade_all_submissions(tasks, path)
         
     
     

@@ -174,7 +174,7 @@ def generate_detailed_report(task: str, submissions_root: Path) -> None:
 
         if has_crashed:
             try:
-                carsh_text = crash_file.read_text(encoding= 'utf-8').strip()
+                crash_text = crash_file.read_text(encoding= 'utf-8').strip()
             except Exception as e:
                 crash_text = f" Failed to read crash file: {e}"
 
@@ -188,7 +188,7 @@ def generate_detailed_report(task: str, submissions_root: Path) -> None:
                     test_cases[test_key][result_key] = crash_text or "Crashed"
                 elif student_name in missing_students:
                     test_cases[test_key][output_key] = "Missing Log"
-                    test_cases[test_key][result_key] = "Missing Log"
+                    test_cases[test_key][result_key] =  "Missing Log"
                 else:
                     test_cases[test_key][output_key] = "Not Available"
                     test_cases[test_key][result_key] = "Not Ran"
@@ -197,7 +197,7 @@ def generate_detailed_report(task: str, submissions_root: Path) -> None:
     for test_row in test_cases.values():
         for student in missing_students:
             test_row[f"{student} - Output"] = "Missing Log"
-            test_row[f"{student} - Result"] = "Missing Log"
+            test_row[f"{student} - Result"] = crash_text or  "Missing Log"
 
 
     # Create DataFrame from test cases and save as Excel report
