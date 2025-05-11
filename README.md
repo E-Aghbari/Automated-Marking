@@ -21,7 +21,33 @@ This program is designed to automate the workflow of marking student programming
 - GUI for easy operation (e.g., selecting folders, click-to-run)
 - Operating System compatibility (Linux-based and Windows). *GUI works better on Windows.*
 
-## Project Structure
+## Setup Instructions
+### Prerequisites
+ - Python 3.10+
+ - Git
+
+### Step 1: Clone the Repository
+```
+git clone https://github.com/E-Aghbari/Automated-Marking.git
+```
+### Step 2: Setup Virtual Environment
+```
+python -m venv venv
+```
+### Step 3: Activate Virtual Environment
+On Windows (Command Prompt)
+```
+call venv\Scripts\activate
+```
+On Mac OS X
+```
+source venv/bin/activate
+```
+
+### Step 4: Install Dependencies
+```
+pip install -r requirements.txt
+```
 
 ## CLI Usage
 ```
@@ -65,5 +91,23 @@ The `Help` button provides you with instructions and things to do before running
 ## Requirements
  - Python 3.7+
  - ```pip install -r requirements.txt```
+
+## Project Structure
+```
+Automated-Marking/
+├── .gitignore
+├── requirements.txt
+├── README.md
+└── src/
+    ├── automarker_gui_support.py     # Back-end widget functioning
+    ├── automarker_gui.py     # Graphical User Interface script
+    ├── automarker_gui.tcl      # Front-end widgets and window
+    ├── automarker.py     # main script
+    ├── clean_submission.py       # cleaning script
+    ├── config.py     # Configuration file
+    ├── report_generate.py      # generating reports
+    ├── 
+    └── venv_manager.py     # Managing Virtual Environment
+```
 ## Author
 Developed by Ebrahim Al Aghbari, Cardiff University
