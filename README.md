@@ -6,7 +6,8 @@ This program is designed to automate the workflow of marking student programming
 1. **Cleaning raw submissions** (Unzipping, renaming, flattening directories and removing unnecessary files)
 2. **Setting up isolated Python environments** for each student submission.
 3. **Duplicating submissionis and overriding** specific task files if needed.
-3. **Running selected tasks** and logging collated results.
+4. **Running selected tasks** and logging collated results.
+5. **Generating collated reports** for virtual environment setup and test tasks results.
 
 ## Features
 - Supports bulk unzipping and renaming
@@ -30,11 +31,15 @@ This program is designed to automate the workflow of marking student programming
 ```
 git clone https://github.com/E-Aghbari/Automated-Marking.git
 ```
-### Step 2: Setup Virtual Environment
+### Step 2: Change directories
+```
+cd Automated-Marking
+```
+### Step 3: Setup Virtual Environment
 ```
 python -m venv venv
 ```
-### Step 3: Activate Virtual Environment
+### Step 4: Activate Virtual Environment
 On Windows (Command Prompt)
 ```
 call venv\Scripts\activate
@@ -44,14 +49,21 @@ On Mac OS X
 source venv/bin/activate
 ```
 
-### Step 4: Install Dependencies
+### Step 5: Install Dependencies
 ```
 pip install -r requirements.txt
 ```
-
+### Step 6: Change into `src` directory
+```
+cd src
+```
+### Step 7: Run GUI of Auto Marker
+```
+python automarker.py GUI 
+```
 ## CLI Usage
 ```
-python automark.py {commands}
+python automarker.py {commands}
 ```
 Available commands:
 - `GUI`: Starts the user interface of the program.
@@ -84,6 +96,7 @@ The `Help` button provides you with instructions and things to do before running
    * **2nd Entry**: select folder that contains teacher's template python tasks (TemplatePythonModel)
 
  - **Run Tests**: This section is responsible for running tasks from the folder with cleaned submissions that was provided in previous entries.
+   * **Entry**: select folder that contains the prepared override scenarios like *Original_Submissions*, *Task1_Override*, *Task1_Task2_Override*.
    * **Checkboxes**: Check boxes of tasks to run.
 
 **Tip**: The shell/CLI used to start GUI can be used to monitor progress of selected operations (progress bar).
@@ -102,11 +115,11 @@ Automated-Marking/
     ├── automarker_gui_support.py     # Back-end widget functioning
     ├── automarker_gui.py     # Graphical User Interface script
     ├── automarker_gui.tcl      # Front-end widgets and window
-    ├── automarker.py     # main script
-    ├── clean_submission.py       # cleaning script
+    ├── automarker.py     # Main script
+    ├── clean_submission.py       # Cleaning script
     ├── config.py     # Configuration file
-    ├── report_generate.py      # generating reports
-    ├── preprocessor.py
+    ├── report_generate.py      # Generating reports
+    ├── preprocessor.py     # Copying and overriding test scripts
     └── venv_manager.py     # Managing Virtual Environment
 ```
 ## Author
