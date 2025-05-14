@@ -13,7 +13,6 @@ from pathlib import Path
 from packaging import requirements
 import requests, chardet
 from config import TASK_CONFIG, DEFAULT_DEPENDENCIES
-import time
 
 # Detects the requirements.txt encoding. 
 def detect_encoding(file_path):
@@ -60,7 +59,7 @@ class VenvManager:
                     raise RuntimeError(result.stderr)
             except Exception as e:
                 # Fallback to built-in venv if 'uv' fails
-                print(f"⚠️ 'uv' failed, falling back to built-in venv. Error: {e}")
+                print(f"'uv' failed, falling back to built-in venv. Error: {e}")
                 result = subprocess.run(
                     [sys.executable, "-m", "venv", str(self._envPath)],
                     capture_output=True,
@@ -158,7 +157,7 @@ class VenvManager:
 
         except Exception as e:
             # Fallback to standard pip installation if 'uv pip' fails
-            print(f"⚠️ 'uv pip' failed, falling back to standard pip. Error: {e}")
+            print(f"'uv pip' failed, falling back to standard pip. Error: {e}")
 
             pipPath = self.get_pip_path()
 
@@ -203,21 +202,21 @@ class VenvManager:
         Executes subprocess with timeout and captures output.
         Raises RuntimeError if execution fails.
         """
-        # start = time.perf_counter()
         pythonPath = sys.executable
         command = [pythonPath] + args
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            cwd = str(cwd) if cwd else None,
-            timeout=59.0
-        )
-
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                cwd = str(cwd) if cwd else None,
+                timeout=59.0
+            )
+        except subprocess.TimeoutExpired:
+            print(f"{self._folderPath.name} has been timed out.")
+            
         if result.returncode != 0:
             raise RuntimeError (f"Failed to run python: {result.stderr}")
-        # end = time.perf_counter()
-        # print(f"Duration {end - start}")
         
         return result.stdout
     
@@ -325,7 +324,4 @@ class VenvManager:
                 f.write(line + "\n")
         
 if __name__ == "__main__":
-    # folder = VenvManager(r"tests/Cleaned_Test_Files/Portfolio 2 Upload Zone_c666666_Task1_Override")
-    # folder.run_python("Task_2", r"tests/Cleaned_Test_Files/Portfolio 2 Upload Zone_c666666_Task1_Override")
-    vm = VenvManager(r'D:\Portfolio\Automated-Marking\Cleaned\Portfolio 2 Upload Zone_c0101227')
-    vm.run_python(['-m', 'unittest', 'Testing_1.py'],vm._folderPath)
+    pass

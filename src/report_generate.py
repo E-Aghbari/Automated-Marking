@@ -9,7 +9,6 @@ This module includes functionality to:
 import pandas as pd
 from pathlib import Path
 import re
-from config import TASK_CONFIG
 from collections import defaultdict
 
 def parse_log(task: str, log_path: str | Path) -> list:
@@ -83,7 +82,7 @@ def generate_detailed_report(task: str, submissions_root: Path) -> None:
 
     # Extract task number and configuration
     task_number = task.split('_')[1]
-    config = TASK_CONFIG.get(task)
+    crash_texts = {}
     test_cases = {}
     missing_students = []
 
@@ -97,21 +96,6 @@ def generate_detailed_report(task: str, submissions_root: Path) -> None:
 
         student_name = student_dir.name
         report_data = []
-
-        # If scenario is None, ensure submission is the original (no override in name)
-        # if config["scenario"] is None:
-        #     if any(scenario["scenario"] in student_dir.name for scenario in TASK_CONFIG.values() if scenario["scenario"]):
-        #         continue  # Skip if it's an override folder
-        # else:
-        #     # If scenario exists, ensure it matches submission name
-        #     if config["scenario"] not in student_dir.name:
-        #         continue
-        
-        # Determine correct log path based on task scenario
-        # if config["scenario"]:
-        #     log_path = student_dir.parent / f"{student_name}"
-        # else:
-        #     log_path = student_dir
             
         log_file = student_dir / f"test_{task_number}.log"
 
@@ -161,7 +145,6 @@ def generate_detailed_report(task: str, submissions_root: Path) -> None:
                     f"{student_ID if student_ID else student_name} - Output": "",
                     f"{student_ID if student_ID else student_name} - Result": "Error"
                 }
-
         else:
             # Track students missing their log files
             missing_students.append(student_ID if student_ID else student_name)
@@ -177,6 +160,7 @@ def generate_detailed_report(task: str, submissions_root: Path) -> None:
                 crash_text = crash_file.read_text(encoding= 'utf-8').strip()
             except Exception as e:
                 crash_text = f" Failed to read crash file: {e}"
+            crash_texts[student_ID if student_ID else student_name] = crash_text
 
         for test_key in list(test_cases.keys()):
             output_key = f"{student_ID if student_ID else student_name} - Output"
@@ -193,11 +177,19 @@ def generate_detailed_report(task: str, submissions_root: Path) -> None:
                     test_cases[test_key][output_key] = "Not Available"
                     test_cases[test_key][result_key] = "Not Ran"
 
+    if not test_cases:
+        test_cases[("No Test Cases Detected", "")] = {
+            "Test Name": "No Test Cases Detected",
+            "Input Parameters": "",
+            "Expected Output": ""
+        }
+
     # For students missing logs entirely, fill all test rows with missing log info
     for test_row in test_cases.values():
         for student in missing_students:
+            student_crash = crash_texts.get(student, None)
             test_row[f"{student} - Output"] = "Missing Log"
-            test_row[f"{student} - Result"] = crash_text or  "Missing Log"
+            test_row[f"{student} - Result"] = student_crash or  "Missing Log"
 
 
     # Create DataFrame from test cases and save as Excel report
@@ -274,27 +266,5 @@ def generate_setup_report(submissions: Path) -> None:
 
     print(f"Collated report for preparation has been created in {task_report}")
 
-
-
-
-
-        
-
-
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(description="Generate detailed test case reports")
-    # parser.add_argument("--task", type=int, required=True, help="Task number to analyze")
-    # args = parser.parse_args()
-    # generate_detailed_report(args.task)
-
-    generate_detailed_report("Task_1",Path("tests/Cleaned_Test_Files"))
-    # results = parse_log('Task_1','test_1.log')
-
-    # for case in results:
-    #     print("🔍 Test Case")
-    #     print(f"Name     : {case['Test Name']}")
-    #     print(f"Status   : {case['Status']}")
-    #     print(f"Input    : {case['Input']}")
-    #     print(f"Expected : {case['Expected']}")
-    #     print(f"Got      : {case['Got']}")
-    #     print("-" * 50)
+    pass

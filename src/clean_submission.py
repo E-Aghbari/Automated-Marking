@@ -169,8 +169,4 @@ class CleanSubmission:
             print("The cleaned directory does not exist or has been moved.")
 
 if __name__ == "__main__":
-    folder = CleanSubmission("tests/Non_Cleaned_Test_Files", "Original_Subs")
-    # folder.unzip(Path("tests/Non_Cleaned_Test_Files/Portfolio 2 Upload Zone_c444_attempt_2024-04-18-02-19-15_Portfolio2.zip"))
-    folder.unzip_all()
-    # folder.flatten_directory()
-    # folder.remove_unneccesary()
+    pass

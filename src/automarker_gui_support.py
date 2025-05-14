@@ -10,6 +10,7 @@
 #    Apr 23, 2025 03:06:30 AM BST  platform: Windows NT
 #    Apr 23, 2025 04:12:26 AM BST  platform: Windows NT
 #    Apr 23, 2025 04:16:19 PM BST  platform: Windows NT
+#    May 13, 2025 08:38:55 PM BST  platform: Windows NT
 
 import sys
 import tkinter as tk
@@ -54,6 +55,7 @@ def initialise():
     _w4.nonCleanbtn['state'] = DISABLED
     _w4.btnSetVenv['state'] = DISABLED
     _w4.btnCopyOverride['state'] = DISABLED
+    _w4.btnRunTest['state'] = DISABLED
 
 def btnRunTest_lclick(*args):
     if _debug:
@@ -74,7 +76,7 @@ def btnRunTest_lclick(*args):
             msgbox.showerror("Error", "No task was chosen.") 
         else:
 
-            grade_all_submissions(tasks, path)
+            grade_all_submissions(tasks, runPath)
             titl = "Operation Completed"
             msg = f"A collated report for the chosen tasks has been created in {path}."
             msgbox.showinfo(titl, msg)
@@ -180,7 +182,6 @@ def btn_Help(*args):
         
         _top5.deiconify()
 
-
 def btn_CopyTestFiles(*args):
     if _debug:
         print('automarker_gui_support.btn_CopyTestFiles')
@@ -224,6 +225,20 @@ def btn_RunTests(*args):
         for arg in args:
             print ('    another arg:', arg)
         sys.stdout.flush()
+
+def btn_GetRunfolder(*args):
+    if _debug:
+        print('automarker_gui_support.btn_GetRunfolder')
+        for arg in args:
+            print ('    another arg:', arg)
+        sys.stdout.flush()
+
+        global runPath
+
+        runPath = Path(filedialog.askdirectory())
+        _w4.btnRunTest['state'] = ACTIVE
+
+        _w4.vEntry5.set(runPath)
 
 if __name__ == '__main__':
     automarker_gui.start_up()

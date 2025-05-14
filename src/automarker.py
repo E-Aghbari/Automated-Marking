@@ -12,14 +12,13 @@ It includes functions for:
 The script uses multithreading for parallel processing and includes progress tracking via tqdm.
 """
 from venv_manager import VenvManager
-from test_manager import SubmissionPreprocessor, run_task
+from preprocessor import SubmissionPreprocessor
 from config import TASK_CONFIG
 from pathlib import Path
 from report_generate import generate_detailed_report, generate_setup_report
 import argparse
 from clean_submission import CleanSubmission
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import time
 import sys
 import os
 from tqdm import tqdm
@@ -36,9 +35,6 @@ def submission_cleaner(non_cleaned_root: Path, cleaned_path: Path = None) -> Pat
     Returns:
         Path: Path to the cleaned submissions directory.
     """
-
-    start_time = time.perf_counter()
-
     cl = CleanSubmission(non_cleaned_root, cleaned_path)
     cl.unzip_all()
     cl.flatten_directory()
@@ -46,11 +42,6 @@ def submission_cleaner(non_cleaned_root: Path, cleaned_path: Path = None) -> Pat
     
     print(f"Cleaned submissions can be found in {cl.cleaned_path}")
     
-    end_time = time.perf_counter()
-
-    duration = end_time - start_time
-    # print(f"Finished setting up venvs for 205 students in {duration:.2f} seconds.")
-
     return cl.cleaned_path
 
 
@@ -62,31 +53,17 @@ def setup_virtualenvs(submissions_root: Path) -> None:
     Args:
         submissions_root (Path): Path to the directory with cleaned student submissions.
     """
-    # print_lock = Lock()
-    
-
-    start_time = time.perf_counter()
-    # prepare_base_venv()
-
     submissions = [s for s in submissions_root.iterdir() if s.is_dir() and s.name.startswith("Portfolio")]
-    # for sub in tqdm(submissions, desc="Setting up Virtual Environments", unit="Submission"):
-    #     v = VenvManager(sub)
-    #     v.create_venv()
-    #     v.install_requirements()
-    #     v.save_log()
 
     def setup(sub):
-        # with print_lock:
-        #     print(f"Starting setup for {sub.name}")
+
         v = VenvManager(sub)
         v.create_venv()
         v.install_requirements()
         v.save_log()
-        # with print_lock:
-        #     print(f"Finished setup for {sub.name}")
 
     threads = int(os.cpu_count() * 1.5)
-    with ThreadPoolExecutor(max_workers=threads) as executor:  # Adjust number of threads based on CPU
+    with ThreadPoolExecutor(max_workers=threads) as executor:  
         futures = {executor.submit(setup, sub): sub.name for sub in submissions}
 
         # Create progress bar
@@ -97,17 +74,7 @@ def setup_virtualenvs(submissions_root: Path) -> None:
             except Exception as e:
                 print(f"Error processing {student_name}: {e}")
 
-            # student = futures[future]
-            # print(f"Finished setup for {student}")
-        # list(tqdm(executor.map(setup, submissions), total= len(submissions), desc="Setting up venvs", unit="student"))
-        
     generate_setup_report(submissions_root)
-    end_time = time.perf_counter()
-
-    duration = end_time - start_time
-    print(f"Finished setting up venvs for {len(submissions)} students in {duration:.2f} seconds.")
-
-    # 61.91 secs
 
 
 def preprocess_subs(teacher_files: Path, submissions_root: Path) -> None:
@@ -120,16 +87,10 @@ def preprocess_subs(teacher_files: Path, submissions_root: Path) -> None:
     """
 
     pre = SubmissionPreprocessor(teacher_files, submissions_root)
-
     pre.process_all_submissions()
 
-def batch_list(lst, batch_size):
-    """Helper to split list into batches."""
-    for i in range(0, len(lst), batch_size):
-        yield lst[i:i + batch_size]
 
-
-def grade_all_submissions(tasks: list, submissions_root: Path, batch_size= 10) -> None:
+def grade_all_submissions(tasks: list, submissions_root: Path) -> None:
     """
     Grades all student submissions across multiple tasks in parallel and generates reports.
 
@@ -137,7 +98,6 @@ def grade_all_submissions(tasks: list, submissions_root: Path, batch_size= 10) -
         tasks (list): List of task names to be tested.
         submissions_root (Path): Path to the directory with prepared student submissions.
     """
-    task_start = time.perf_counter()
     threads = os.cpu_count() * 1.5
 
     for task in tasks:
@@ -170,21 +130,10 @@ def grade_all_submissions(tasks: list, submissions_root: Path, batch_size= 10) -
                     try:
                         future.result()
                     except Exception as e:
-                        print(f"❌ Error in {submission.name} for {task}: {e}")
+                        print(f"Error in {submission.name} for {task}: {e}")
                     pbar.update(1)
 
         generate_detailed_report(task, scenario_root)
-
-    task_end = time.perf_counter()
-    task_duration = task_end - task_start
-    print(f"Finished grading all tasks in {task_duration:.2f} seconds.")
-
-def grade_single_submission_wrapper(task, submission):
-    try:
-        grade_single_submission(task, submission)
-        return submission.name, "Success"
-    except Exception as e:
-        return submission.name, f"Error: {e}"
 
 
 def grade_single_submission(task: str, submission: Path) -> None:
@@ -198,46 +147,38 @@ def grade_single_submission(task: str, submission: Path) -> None:
 
     run_task(task, submission, VenvManager(submission))
 
-    # try:
-    #     config = TASK_CONFIG.get(task_name)
-    #     if not config:
-    #         raise ValueError(f"Unknown task: {task_name}")
 
-    #     # print("Submission path:", submission_path)
+def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager) -> str:
+    """
+    Executes the appropriate test script for a specific task using a virtual environment manager.
 
-    #     # Determine the correct test directory based on scenario presence
-    #     if config["scenario"]:
-    #         # If a scenario is specified, use the submission directory name directly
-    #         test_dir = submission.parent / f"{submission.name}"        
-    #     else:
-    #         test_dir = submission  # Use the original directory if no scenario
+    Args:
+        task_name (str): Identifier for the task to run (e.g., "Task_1").
+        submission_path (Path): Path to the student's submission folder.
+        venv_manager (VenvManager): Instance managing the Python virtual environment.
 
-    #     test_script = test_dir / config["test_script"]
-        
-    #     # Get the Python path from the student's venv (replace with your logic)
-    #     python_path = VenvManager(submission).get_python_path()
-        
-    #     # Build the test command
-    #     args = ["-m", "unittest", test_script.name]
-        
-    #     # Run tests asynchronously
-    #     proc = await asyncio.create_subprocess_exec(
-    #         str(python_path),
-    #         *args,
-    #         stdout=asyncio.subprocess.PIPE,
-    #         stderr=asyncio.subprocess.PIPE,
-    #         cwd=str(submission)
-    #     )
-        
-    #     stdout, stderr = await proc.communicate()
-        
-    #     if proc.returncode != 0:
-    #         raise RuntimeError(f"Tests failed: {stderr.decode()}")
-            
-    #     # Process results here (e.g., save to report)
-        
-    # except Exception as e:
-    #     print(f"Error grading {submission.name}: {str(e)}")
+    Returns:
+        str: Output from the unittest execution, if successful.
+    """
+    # Retrieve task configuration details
+    config = TASK_CONFIG.get(task_name)
+
+    test_script = submission_path / config["test_script"]
+
+    # If the test script does not exist in the expected location, raise error
+    if not test_script.exists():
+        raise FileNotFoundError(f"Test script {test_script} not found in {submission_path}")
+
+    # Run the unittest module using the submission's virtual environment
+    try:
+        return venv_manager.run_python(
+            args=["-m", "unittest", test_script.name],
+            cwd=submission_path  # Critical for proper imports within the test environment
+        )
+    except Exception as e:
+        # On failure, write the exception details to a crash log file in the test directory
+        with open(submission_path / f"TEST_{task_name}.crash", 'w' ) as f:
+            f.write(str(e))
 
 
 def main():
@@ -252,6 +193,7 @@ def main():
         description="Run a specific step in the marking pipeline",
         required=True
     )
+
     subparser.add_parser("GUI", help="User interface of the program.")
     
     clean_submissions = subparser.add_parser("clean-subs", help="Unzip and clean students' submissions.")
@@ -293,10 +235,6 @@ def main():
         grade_all_submissions(tasks, path)
         
     
-    
-    
-
-
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("Missing command.\n")
@@ -304,12 +242,5 @@ if __name__ == "__main__":
         print("Use `-h` or `--help` after a command for more info.")
         print()
         sys.exit(1)
-    # print(Path(__file__).resolve())
-    # preprocess_subs(Path(r"/Users/ebrahim_alaghbari/Documents/Portifolio/Automated-Marking/TemplatePythonModel"), Path(r"tests/Cleaned_Test_Files"))
-    # grade_single_submission("Task_1", Path(r"D:\Portfolio\\Automated-Marking\Cleaned_suba\Portfolio 2 Upload Zone_c0101213"))
-    # setup_venvs(Path(r"tests/Cleaned_Test_Files"))
-    # grade_all_submissions(["Task_1","Task_2", "Task_3", "Task_4"], Path(r"D:\Portfolio\Automated-Marking\Cleaned_Submissions"))
-    # setup_venvs(Path(r"/Users/ebrahim_alaghbari/Documents/Portifolio/Automated-Marking/tests/Cleaned_Test_Files"))
+
     main()
-    # setup_virtualenvs(Path(r"D:\Portfolio\Automated-Marking\tests\Cleaned_Submissions - Copy (4) - Copy - Copy"))
-    # all__(Path(r"D:\Portfolio\Automated-Marking\mock_zips"), Path(r"D:\Portfolio\Automated-Marking\TemplatePythonModel"))
