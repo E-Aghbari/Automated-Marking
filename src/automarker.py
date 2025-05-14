@@ -24,6 +24,8 @@ import os
 from tqdm import tqdm
 import automarker_gui 
 
+#
+# Cleans raw student submissions by unzipping and organizing them into a consistent structure
 def submission_cleaner(non_cleaned_root: Path, cleaned_path: Path = None) -> Path:
     """
     Cleans raw student submissions by unzipping, renaming, flattening directories, and removing unnecessary files.
@@ -45,6 +47,8 @@ def submission_cleaner(non_cleaned_root: Path, cleaned_path: Path = None) -> Pat
     return cl.cleaned_path
 
 
+#
+# Sets up virtual environments and installs requirements for each student submission
 def setup_virtualenvs(submissions_root: Path) -> None:
     """
     Sets up virtual environments for each cleaned student submission and installs necessary requirements.
@@ -77,6 +81,8 @@ def setup_virtualenvs(submissions_root: Path) -> None:
     generate_setup_report(submissions_root)
 
 
+#
+# Copies test files and overrides necessary student code for evaluation
 def preprocess_subs(teacher_files: Path, submissions_root: Path) -> None:
     """
     Copies student submissions, test files and overrides tasks for each student submission.
@@ -90,6 +96,8 @@ def preprocess_subs(teacher_files: Path, submissions_root: Path) -> None:
     pre.process_all_submissions()
 
 
+#
+# Grades all submissions across specified tasks in parallel and generates summary reports
 def grade_all_submissions(tasks: list, submissions_root: Path) -> None:
     """
     Grades all student submissions across multiple tasks in parallel and generates reports.
@@ -136,6 +144,8 @@ def grade_all_submissions(tasks: list, submissions_root: Path) -> None:
         generate_detailed_report(task, scenario_root)
 
 
+#
+# Grades an individual student’s submission for a single task
 def grade_single_submission(task: str, submission: Path) -> None:
     """
     Grades a single student submission for a specific task.
@@ -148,6 +158,8 @@ def grade_single_submission(task: str, submission: Path) -> None:
     run_task(task, submission, VenvManager(submission))
 
 
+#
+# Executes the test script for a given task within a student’s virtual environment
 def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager) -> str:
     """
     Executes the appropriate test script for a specific task using a virtual environment manager.
@@ -176,11 +188,13 @@ def run_task(task_name: str, submission_path: Path, venv_manager: VenvManager) -
             cwd=submission_path  # Critical for proper imports within the test environment
         )
     except Exception as e:
-        # On failure, write the exception details to a crash log file in the test directory
+        # On failure write the exception details to a crash log file in the test directory
         with open(submission_path / f"TEST_{task_name}.crash", 'w' ) as f:
             f.write(str(e))
 
 
+#
+# Main CLI entry point; parses command-line arguments and routes to appropriate functions
 def main():
     """
     Entry point for the CLI tool. Parses command-line arguments and dispatches commands
@@ -193,9 +207,10 @@ def main():
         description="Run a specific step in the marking pipeline",
         required=True
     )
-
+    # Subparser for GUI
     subparser.add_parser("GUI", help="User interface of the program.")
     
+    # Subparser for each command
     clean_submissions = subparser.add_parser("clean-subs", help="Unzip and clean students' submissions.")
     clean_submissions.add_argument("--nonclean-path", required=True, help="Absolute path to the folder containing non-cleaned submissions.")
     clean_submissions.add_argument("--path", required=True, help="Absolute path to the folder containing CSV files, 'Testing files' folder and Images")
@@ -211,6 +226,7 @@ def main():
     run_tests.add_argument("--path", required=True, help="Absolute path to the folder containing cleaned and prepared submissions.")
     run_tests.add_argument("--tasks", required=True, help="Type the tasks that need to be tested  separated by a comma (no spacing). E.g: Task_1,Task_2")
 
+    # Parse the command-line arguments
     args = parser.parse_args()
 
     if args.command == "GUI":

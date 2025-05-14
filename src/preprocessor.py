@@ -33,6 +33,7 @@ class SubmissionPreprocessor:
         # Step 2: Main original directory
         self.original_dir = self.submissions_root / 'Original_Submissions'
 
+    # Main method to process all student submissions: inject test files, move originals, and apply task-specific overrides
     def process_all_submissions(self) -> None:
         # Step 1: Inject test files into each Portfolio_* submission
         portfolio_submissions = [submission_dir for submission_dir in self.submissions_root.iterdir() 
@@ -64,6 +65,7 @@ class SubmissionPreprocessor:
                         self._apply_overrides(submission_dir, override_files)
                 pbar.update(1)
 
+    # Copies standard test files (Testing_*.py, Dummy.py, Helper.py) into a student's submission directory
     def _copy_test_files(self, dest_dir: Path) -> None:
         for test_file in self.teacher_test_dir.glob('Testing_*.py'):
             shutil.copy2(test_file, dest_dir / test_file.name)
@@ -74,6 +76,7 @@ class SubmissionPreprocessor:
             else:
                 print(f"Warning: Helper file {helper_file} not found.")
 
+    # Applies override files (e.g., modified task scripts) into a specific student submission directory
     def _apply_overrides(self, submission_dir: Path, override_files: list) -> None:
         for file_name in override_files:
             teacher_file = self.teacher_test_dir / file_name

@@ -25,6 +25,8 @@ import automarker_gui
 
 _debug = True # False to eliminate debug printing from callback functions.
 
+#
+# Entry point of the application; sets up main and help windows and starts the GUI loop
 def main(*args):
     '''Main entry point for the application.'''
     global root
@@ -44,6 +46,8 @@ def main(*args):
     initialise()
     root.mainloop()
 
+#
+# Initialises the GUI by resetting all widget states
 def initialise():
     _top5.withdraw()
 
@@ -57,6 +61,8 @@ def initialise():
     _w4.btnCopyOverride['state'] = DISABLED
     _w4.btnRunTest['state'] = DISABLED
 
+#
+# Callback for "Run Test" button; collects selected tasks and runs grading
 def btnRunTest_lclick(*args):
     if _debug:
         print('automarker_gui_support.btnRunTest_lclick')
@@ -81,6 +87,8 @@ def btnRunTest_lclick(*args):
             msg = f"A collated report for the chosen tasks has been created in {path}."
             msgbox.showinfo(titl, msg)
         
+#
+# Callback for "Clean Submissions" button; invokes submission cleaning process
 def btn_Clean(*args):
     if _debug:
         print('automarker_gui_support.btn_Clean')
@@ -93,6 +101,8 @@ def btn_Clean(*args):
         msg = f"Cleaned Submissions can be found in {cln}"
         msgbox.showinfo(titl, msg)
 
+#
+# Callback for getting non-clean submissions directory from file dialog
 def btn_GetNonClean(*args):
     if _debug:
         print('automarker_gui_support.btn_GetNonClean')
@@ -106,6 +116,8 @@ def btn_GetNonClean(*args):
         _w4.vEntry.set(str(nonClean_path))
         _w4.nonCleanbtn['state'] = ACTIVE
 
+#
+# Callback for "Copy Override" button; injects test files into student submissions
 def btn_CopyOverride(*args):
     if _debug:
         print('automarker_gui_support.btn_CopyOverride')
@@ -119,6 +131,8 @@ def btn_CopyOverride(*args):
         msgbox.showinfo(titl, msg)
         
 
+#
+# Callback for selecting test path directory; enables override button
 def btn_GetTestPath(*args):
     if _debug:
         print('automarker_gui_support.btn_GetTestPath')
@@ -132,6 +146,8 @@ def btn_GetTestPath(*args):
         _w4.btnCopyOverride['state'] = ACTIVE
         _w4.vEntry3.set(testPath)
 
+#
+# Callback for setting up virtual environments for submissions
 def btn_SetupVenv(*args):
     if _debug:
         print('automarker_gui_support.btn_SetupVenv')
@@ -144,6 +160,8 @@ def btn_SetupVenv(*args):
         msg = f"A collated report has been created in {path}"
         msgbox.showinfo(titl, msg)
 
+#
+# Callback for selecting cleaned submissions directory; enables venv setup button
 def btn_GetCleanPath(*args):
     if _debug:
         print('automarker_gui_support.btn_GetCleanPath')
@@ -156,6 +174,8 @@ def btn_GetCleanPath(*args):
         _w4.btnSetVenv['state'] = ACTIVE
         _w4.vEntry2.set(path)
 
+#
+# Callback to exit the application cleanly
 def btnExit_lclick(*args):
     if _debug:
         print('automarker_gui_support.btnExit_lclick')
@@ -164,6 +184,8 @@ def btnExit_lclick(*args):
         sys.stdout.flush()
     root.destroy()
 
+#
+# Callback to close the help window
 def btn_Close(*args):
     if _debug:
         print('automarker_gui_support.btn_Close')
@@ -173,6 +195,8 @@ def btn_Close(*args):
 
         _top5.withdraw()
 
+#
+# Callback to display the help window
 def btn_Help(*args):
     if _debug:
         print('automarker_gui_support.btn_Help')
@@ -182,6 +206,8 @@ def btn_Help(*args):
         
         _top5.deiconify()
 
+#
+# Opens a dialog to select test files for copying (currently prints selected file)
 def btn_CopyTestFiles(*args):
     if _debug:
         print('automarker_gui_support.btn_CopyTestFiles')
@@ -199,6 +225,8 @@ def btn_GetCopyFiles(*args):
             print ('    another arg:', arg)
         sys.stdout.flush()
 
+#
+# Callback for selecting test files directory
 def btn_GetTestFiles(*args):
     if _debug:
         print('automarker_gui_support.btn_GetTestFiles')
@@ -226,6 +254,8 @@ def btn_RunTests(*args):
             print ('    another arg:', arg)
         sys.stdout.flush()
 
+#
+# Callback for selecting the folder in which to run tests; enables run button
 def btn_GetRunfolder(*args):
     if _debug:
         print('automarker_gui_support.btn_GetRunfolder')

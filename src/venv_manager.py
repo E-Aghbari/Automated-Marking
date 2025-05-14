@@ -212,9 +212,10 @@ class VenvManager:
                 cwd = str(cwd) if cwd else None,
                 timeout=59.0
             )
+        
+        ## Handle timeout exception
         except subprocess.TimeoutExpired:
             print(f"{self._folderPath.name} has been timed out.")
-            
         if result.returncode != 0:
             raise RuntimeError (f"Failed to run python: {result.stderr}")
         

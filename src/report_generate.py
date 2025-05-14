@@ -177,6 +177,8 @@ def generate_detailed_report(task: str, submissions_root: Path) -> None:
                     test_cases[test_key][output_key] = "Not Available"
                     test_cases[test_key][result_key] = "Not Ran"
 
+    # If no test cases were detected, add a placeholder entry
+    # to indicate that no tests were run
     if not test_cases:
         test_cases[("No Test Cases Detected", "")] = {
             "Test Name": "No Test Cases Detected",
