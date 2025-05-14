@@ -42,7 +42,7 @@ TASK_CONFIG = {
 
 # Files to retain in each cleaned student submission
 # All other files and folders will be removed during the cleaning step
-KEEP_FILES = {
+KEEP_FILES = [
 
             "Task_1.py", 
             "Task_2.py", 
@@ -53,7 +53,7 @@ KEEP_FILES = {
             "README.txt", 
             "Helper.py", 
             "notes.txt"
-        }
+        ]
 
 # Required packages to install in each student's virtual environment
 # Ensure these match the versions expected by the test scripts
