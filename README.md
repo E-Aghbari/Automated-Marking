@@ -89,7 +89,7 @@ The `Help` button provides you with instructions and things to do before running
 **Tip**: The shell/CLI used to start GUI can be used to monitor progress of selected operations (progress bar).
 
 ## Requirements
- - Python 3.7+
+ - Python 3.10+
  - ```pip install -r requirements.txt```
 
 ## Project Structure
@@ -106,7 +106,7 @@ Automated-Marking/
     ├── clean_submission.py       # cleaning script
     ├── config.py     # Configuration file
     ├── report_generate.py      # generating reports
-    ├── 
+    ├── preprocessor.py
     └── venv_manager.py     # Managing Virtual Environment
 ```
 ## Author
